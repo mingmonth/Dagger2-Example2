@@ -1,5 +1,6 @@
 package com.hariofspades.dagger2advanced;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,9 +13,15 @@ import com.google.gson.GsonBuilder;
 import com.hariofspades.dagger2advanced.adapter.RandomUserAdapter;
 import com.hariofspades.dagger2advanced.interfaces.RandomUsersApi;
 import com.hariofspades.dagger2advanced.model.RandomUsers;
+import com.jakewharton.picasso.OkHttp3Downloader;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
+import com.squareup.picasso.OkHttpDownloader;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+
+import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -32,17 +39,28 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     RandomUserAdapter mAdapter;
 
+    Context context;
+    Picasso picasso;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
 
+        context = this;
+
         GsonBuilder gsonBuilder = new GsonBuilder();
         Gson gson = gsonBuilder.create();
 
         Logger.addLogAdapter(new AndroidLogAdapter());
         //Timber.plant(new Timber.DebugTree());
+
+        File cacheFile = new File(context.getCacheDir(), "HttpCache");
+        Logger.d("getCacheDir : " + context.getCacheDir());
+        cacheFile.mkdirs();
+
+        Cache cache = new Cache(cacheFile, 10 * 1000 * 1000); // 10MB
 
         HttpLoggingInterceptor httpLoggingInterceptor = new
                 HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
@@ -58,8 +76,13 @@ public class MainActivity extends AppCompatActivity {
 
         OkHttpClient okHttpClient = new OkHttpClient()
                 .newBuilder()
+                .cache(cache)
                 .addInterceptor(httpLoggingInterceptor)
                 .build();
+
+        OkHttp3Downloader okHttp3Downloader = new OkHttp3Downloader(okHttpClient);
+
+        picasso = new Picasso.Builder(context).downloader(okHttp3Downloader).build();
 
         retrofit = new Retrofit.Builder()
                 .client(okHttpClient)
