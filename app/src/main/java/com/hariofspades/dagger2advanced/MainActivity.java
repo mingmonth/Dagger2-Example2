@@ -11,8 +11,11 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hariofspades.dagger2advanced.adapter.RandomUserAdapter;
+import com.hariofspades.dagger2advanced.component.DaggerRandomUsersComponent;
+import com.hariofspades.dagger2advanced.component.RandomUsersComponent;
 import com.hariofspades.dagger2advanced.interfaces.RandomUsersApi;
 import com.hariofspades.dagger2advanced.model.RandomUsers;
+import com.hariofspades.dagger2advanced.module.ContextModule;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     Context context;
     Picasso picasso;
+    RandomUsersApi randomUsersApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,50 +52,60 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initViews();
 
-        context = this;
+        afterDagger();
 
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        Gson gson = gsonBuilder.create();
-
-        Logger.addLogAdapter(new AndroidLogAdapter());
-        //Timber.plant(new Timber.DebugTree());
-
-        File cacheFile = new File(context.getCacheDir(), "HttpCache");
-        Logger.d("getCacheDir : " + context.getCacheDir());
-        cacheFile.mkdirs();
-
-        Cache cache = new Cache(cacheFile, 10 * 1000 * 1000); // 10MB
-
-        HttpLoggingInterceptor httpLoggingInterceptor = new
-                HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-            @Override
-            public void log(@NonNull String message) {
-                //Timber.i(message);
-                Logger.d(message);
-                //Log.d(TAG, "log: " + message);
-            }
-        });
-
-        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient okHttpClient = new OkHttpClient()
-                .newBuilder()
-                .cache(cache)
-                .addInterceptor(httpLoggingInterceptor)
-                .build();
-
-        OkHttp3Downloader okHttp3Downloader = new OkHttp3Downloader(okHttpClient);
-
-        picasso = new Picasso.Builder(context).downloader(okHttp3Downloader).build();
-
-        retrofit = new Retrofit.Builder()
-                .client(okHttpClient)
-                .baseUrl("https://randomuser.me/")
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+//        context = this;
+//
+//        GsonBuilder gsonBuilder = new GsonBuilder();
+//        Gson gson = gsonBuilder.create();
+//
+//        Logger.addLogAdapter(new AndroidLogAdapter());
+//        //Timber.plant(new Timber.DebugTree());
+//
+//        File cacheFile = new File(context.getCacheDir(), "HttpCache");
+//        Logger.d("getCacheDir : " + context.getCacheDir());
+//        cacheFile.mkdirs();
+//
+//        Cache cache = new Cache(cacheFile, 10 * 1000 * 1000); // 10MB
+//
+//        HttpLoggingInterceptor httpLoggingInterceptor = new
+//                HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+//            @Override
+//            public void log(@NonNull String message) {
+//                //Timber.i(message);
+//                Logger.d(message);
+//                //Log.d(TAG, "log: " + message);
+//            }
+//        });
+//
+//        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+//
+//        OkHttpClient okHttpClient = new OkHttpClient()
+//                .newBuilder()
+//                .cache(cache)
+//                .addInterceptor(httpLoggingInterceptor)
+//                .build();
+//
+//        OkHttp3Downloader okHttp3Downloader = new OkHttp3Downloader(okHttpClient);
+//
+//        picasso = new Picasso.Builder(context).downloader(okHttp3Downloader).build();
+//
+//        retrofit = new Retrofit.Builder()
+//                .client(okHttpClient)
+//                .baseUrl("https://randomuser.me/")
+//                .addConverterFactory(GsonConverterFactory.create(gson))
+//                .build();
 
         populateUsers();
 
+    }
+
+    private void afterDagger() {
+        RandomUsersComponent daggerRandomUserComponent = DaggerRandomUsersComponent.builder()
+                .contextModule(new ContextModule(this))
+                .build();
+        picasso = daggerRandomUserComponent.getPicasso();
+        randomUsersApi = daggerRandomUserComponent.getRandomUsersService();
     }
 
     private void initViews() {
@@ -100,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void populateUsers() {
-        Call<RandomUsers> randomUsersCall = getRandomUserService().getRandomUsers(10);
+        Call<RandomUsers> randomUsersCall = randomUsersApi.getRandomUsers(10);
         randomUsersCall.enqueue(new Callback<RandomUsers>() {
             @Override
             public void onResponse(Call<RandomUsers> call, @NonNull Response<RandomUsers> response) {
@@ -123,8 +137,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public RandomUsersApi getRandomUserService(){
-        return retrofit.create(RandomUsersApi.class);
+        //return retrofit.create(RandomUsersApi.class);
+        return randomUsersApi;
     }
-
 
 }

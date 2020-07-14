@@ -2,8 +2,7 @@ package com.hariofspades.dagger2advanced.module;
 
 import android.content.Context;
 
-import com.hariofspades.dagger2advanced.interfaces.ApplicationContext;
-import com.hariofspades.dagger2advanced.interfaces.RandomUsersApplicationScope;
+import com.hariofspades.dagger2advanced.interfaces.ApplicationScope;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
@@ -33,9 +32,10 @@ public class OkHttpClientModule {
         return new Cache(cacheFile, 10 * 1000 * 1000); //10 MB
     }
 
+
     @Provides
-    @RandomUsersApplicationScope
-    public File file(@ApplicationContext Context context){
+    @ApplicationScope
+    public File file(Context context){
         File file = new File(context.getCacheDir(), "HttpCache");
         file.mkdirs();
         return file;
