@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Blog.iml" filepath="$PROJECT_DIR$/Blog.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Dagger-2-Advanced-kickstart.iml" filepath="$PROJECT_DIR$/.idea/modules/Dagger-2-Advanced-kickstart.iml" group="Dagger-2-Advanced-kickstart" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Dagger-2-Advanced-kickstart-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Dagger-2-Advanced-kickstart-app.iml" group="Dagger-2-Advanced-kickstart/app" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+    </modules>
+  </component>
+</project>
