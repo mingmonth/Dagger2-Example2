@@ -21,10 +21,15 @@ import java.util.List;
 
 public class RandomUserAdapter extends RecyclerView.Adapter<RandomUserAdapter.RandomUserViewHolder> {
 
+    private final Picasso picasso;
+    private final MainActivity mainActivity;
+
     private List<Result> resultList = new ArrayList<>();
 
 
-    public RandomUserAdapter() {
+    public RandomUserAdapter(MainActivity mainActivity, Picasso picasso) {
+        this.mainActivity = mainActivity;
+        this.picasso = picasso;
     }
 
     @Override

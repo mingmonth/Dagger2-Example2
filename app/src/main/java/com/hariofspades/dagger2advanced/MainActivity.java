@@ -11,11 +11,14 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hariofspades.dagger2advanced.adapter.RandomUserAdapter;
+import com.hariofspades.dagger2advanced.component.DaggerMainActivityComponent;
 import com.hariofspades.dagger2advanced.component.DaggerRandomUsersComponent;
+import com.hariofspades.dagger2advanced.component.MainActivityComponent;
 import com.hariofspades.dagger2advanced.component.RandomUsersComponent;
 import com.hariofspades.dagger2advanced.interfaces.RandomUsersApi;
 import com.hariofspades.dagger2advanced.model.RandomUsers;
 import com.hariofspades.dagger2advanced.module.ContextModule;
+import com.hariofspades.dagger2advanced.module.MainActivityModule;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
@@ -51,8 +54,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-
-        afterDagger();
+//        Logger.addLogAdapter(new AndroidLogAdapter());
+//        afterDagger();
+        afterActivityLevelComponent();
 
 //        context = this;
 //
@@ -100,11 +104,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void afterActivityLevelComponent() {
+        MainActivityComponent mainActivityComponent = DaggerMainActivityComponent.builder()
+                .mainActivityModule(new MainActivityModule(this))
+                .randomUsersComponent(RandomUserApplication.get(this).getRandomUserApplicationComponent())
+                .build();
+        randomUsersApi = mainActivityComponent.getRandomUsersService();
+        mAdapter = mainActivityComponent.getRandomUserAdapter();
+    }
+
     private void afterDagger() {
         RandomUsersComponent daggerRandomUserComponent = DaggerRandomUsersComponent.builder()
                 .contextModule(new ContextModule(this))
                 .build();
-        picasso = daggerRandomUserComponent.getPicasso();
+        //picasso = daggerRandomUserComponent.getPicasso();
         randomUsersApi = daggerRandomUserComponent.getRandomUsersService();
     }
 
@@ -121,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 //Log.d(TAG, "onResponse: " + response);
                 Logger.d(response);
                 if(response.isSuccessful()) {
-                    mAdapter = new RandomUserAdapter();
+                    //mAdapter = new RandomUserAdapter(this, picasso);
                     mAdapter.setItems(response.body().getResults());
                     recyclerView.setAdapter(mAdapter);
                 }
